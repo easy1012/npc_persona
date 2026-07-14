@@ -1,29 +1,46 @@
-.*/
-.env
-.env.local
-.env.design-test
-.env.*.local
+# Local agent and code indexes
+.codegraph/
+.omo/
 
+# Local environment and secrets
+.env
+.env.*
+!.env.example
+!.env.*.example
+.private/
+
+# Python environments and caches
 .venv/
+**/.venv-broken/
 __pycache__/
-*.pyc
+*.py[cod]
 .pytest_cache/
 .mypy_cache/
 .ruff_cache/
+.coverage
+htmlcov/
 
-.hf-cache/
-.omo/
-.playwright-cli/
+# Runtime output and logs
+output/
+logs/
+*.log
+*.pid
 data_export/
-models/
+workspace_source/
+
+# Browser QA artifacts
+.playwright-cli/
+.playwright/
 playwright-report/
 test-results/
-workspace_source/
-output/playwright/
-output/
-.private/
-.affine/
-affine/
-.study/
-test_script/
-test-results/
+
+# Local model storage
+.hf-cache/
+models/
+
+# Editor and operating-system files
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db
+Desktop.ini

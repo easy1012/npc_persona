@@ -1,0 +1,8 @@
+FROM python:3.10-slim
+WORKDIR /app
+COPY --from=ghcr.io/astral-sh/uv:latest /uv /usr/local/bin/uv
+COPY pyproject.toml uv.lock ./
+RUN uv sync --frozen --no-dev
+COPY alembic.ini schema.py ./
+COPY migrations ./migrations
+CMD ["uv", "run", "--frozen", "alembic", "-c", "alembic.ini", "upgrade", "head"]

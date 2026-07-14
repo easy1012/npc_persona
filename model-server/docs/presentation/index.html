@@ -1,0 +1,349 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>NPC Persona v2 Offline Technical Briefing</title>
+  <meta name="description" content="NPC Persona v2 발표용 오프라인 정적 HTML deck">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <a class="skip-link" href="#deck">슬라이드 본문으로 이동</a>
+  <header class="topbar" aria-label="Deck navigation">
+    <div class="brand-block">
+      <span class="eyebrow">Offline v2 briefing</span>
+      <strong>Hazel Village GraphRAG</strong>
+    </div>
+    <div class="nav-cluster" aria-label="Slide controls">
+      <button id="prevSlide" class="nav-button" type="button" aria-label="이전 슬라이드">Prev</button>
+      <span id="slideCounter">1 / 12</span>
+      <button id="nextSlide" class="nav-button" type="button" aria-label="다음 슬라이드">Next</button>
+    </div>
+  </header>
+
+  <main id="deck" class="deck" aria-live="polite">
+    <section class="slide source-slide" data-source-id="source-00-index" data-source-file="00_index.md" data-slide-index="0" aria-labelledby="slide-title-0">
+      <div class="slide-copy">
+        <p class="kicker">00 / Source Map</p>
+        <h1 id="slide-title-0">NPC Persona v2 Presentation Source Index</h1>
+        <p class="explain">이 첫 장은 발표 자료의 색인이다. 12개의 원천 문서를 한 번에 압축하지 않고, 아키텍처, canonical story source, importer, graph contract, runtime, quest progression, prompt safety, admin, deployment, QA, visual guide를 각각 한 장씩 추적한다. `rsc/data`는 편집 기준이고 `output/ is generated`라는 원칙을 맨 앞에 둔다. 발표자는 이 장에서 Direct importer와 Offline pipeline의 차이를 먼저 선언해 뒤의 모든 슬라이드가 같은 기준으로 읽히게 만든다.</p>
+        <a class="source-link" href="../npc_persona_version_2/presentation_source/00_index.md">Source: 00_index.md</a>
+        <div class="fact-grid" aria-label="index facts">
+          <span>12 documents</span><span>one slide per source</span><span>local SVG only</span><span>Korean-first copy</span>
+        </div>
+      </div>
+      <aside class="diagram-card" aria-label="source roadmap diagram">
+        <svg class="diagram" viewBox="0 0 640 420" role="img" aria-labelledby="diagram-title-0">
+          <title id="diagram-title-0">Presentation source roadmap</title>
+          <rect x="24" y="28" width="592" height="364" rx="22" class="svg-panel"></rect>
+          <path d="M112 96h160M272 96v84M272 180h160M272 180v84M112 264h160M432 264H272" class="svg-line"></path>
+          <rect x="72" y="68" width="120" height="56" rx="12" class="svg-node accent"></rect>
+          <rect x="232" y="152" width="120" height="56" rx="12" class="svg-node"></rect>
+          <rect x="392" y="152" width="120" height="56" rx="12" class="svg-node success"></rect>
+          <rect x="72" y="236" width="120" height="56" rx="12" class="svg-node warning"></rect>
+          <rect x="392" y="236" width="120" height="56" rx="12" class="svg-node"></rect>
+          <text x="132" y="101" text-anchor="middle">Index</text>
+          <text x="292" y="185" text-anchor="middle">Data</text>
+          <text x="452" y="185" text-anchor="middle">Runtime</text>
+          <text x="132" y="269" text-anchor="middle">QA</text>
+          <text x="452" y="269" text-anchor="middle">Visual</text>
+        </svg>
+      </aside>
+    </section>
+
+    <section class="slide source-slide" data-source-id="source-01-system-architecture" data-source-file="01_system_architecture.md" data-slide-index="1" aria-labelledby="slide-title-1">
+      <div class="slide-copy">
+        <p class="kicker">01 / Architecture</p>
+        <h1 id="slide-title-1">System Architecture</h1>
+        <p class="explain">전체 구조는 `rsc/data`에서 시작해 Neo4j와 Streamlit을 거쳐 NPC 답변으로 끝난다. 런타임은 quest decision을 먼저 계산하고, 그 결과로 허용된 KnowledgeChunk만 prompt에 넣는다. 발표에서는 LLM 호출 세부 주소나 비밀값을 말하지 않고, 안전한 공개 표현으로 “vLLM 호환 응답 계층”만 표시한다. 핵심은 사용자의 한 턴이 LangGraph 판정, graph-scoped retrieval, prompt assembly, response logging 순서로 진행된다는 점이다.</p>
+        <a class="source-link" href="../npc_persona_version_2/presentation_source/01_system_architecture.md">Source: 01_system_architecture.md</a>
+        <div class="fact-grid" aria-label="architecture facts">
+          <span>rsc/data</span><span>Neo4j runtime graph</span><span>Streamlit chat UI</span><span>split evidence logs</span>
+        </div>
+      </div>
+      <aside class="diagram-card" aria-label="architecture flow diagram">
+        <svg class="diagram" viewBox="0 0 640 420" role="img" aria-labelledby="diagram-title-1">
+          <title id="diagram-title-1">System architecture flow</title>
+          <rect x="28" y="48" width="140" height="84" rx="16" class="svg-node success"></rect>
+          <rect x="250" y="48" width="140" height="84" rx="16" class="svg-node"></rect>
+          <rect x="472" y="48" width="140" height="84" rx="16" class="svg-node accent"></rect>
+          <rect x="250" y="224" width="140" height="84" rx="16" class="svg-node warning"></rect>
+          <rect x="472" y="224" width="140" height="84" rx="16" class="svg-node"></rect>
+          <path d="M168 90h82M390 90h82M542 132v92M472 266h-82M320 224V132" class="svg-line"></path>
+          <text x="98" y="96" text-anchor="middle">rsc/data</text>
+          <text x="320" y="96" text-anchor="middle">Importer</text>
+          <text x="542" y="96" text-anchor="middle">Neo4j</text>
+          <text x="542" y="272" text-anchor="middle">Streamlit</text>
+          <text x="320" y="272" text-anchor="middle">Quest</text>
+        </svg>
+      </aside>
+    </section>
+
+    <section class="slide source-slide" data-source-id="source-02-canonical-story-data" data-source-file="02_canonical_story_data.md" data-slide-index="2" aria-labelledby="slide-title-2">
+      <div class="slide-copy">
+        <p class="kicker">02 / Story Source</p>
+        <h1 id="slide-title-2">Canonical Story Data</h1>
+        <p class="explain">스토리의 기준은 언제나 `rsc/data`다. NPC Markdown은 프로필과 지식 블록을 제공하고, Quest YAML은 진행 규칙과 정답 공개 정책을 제공하며, World YAML은 clue, truth, role, event ID 계약을 제공한다. `chief_rowan`, `truth_moonwell_mana_cycle`, `answer_sensitive` 같은 값은 런타임 gate에 직접 연결되므로 단순 발표 문구가 아니다. 특히 `NPC-[:KNOWS]->KnowledgeChunk` 관계는 NPC가 실제로 말할 수 있는 지식의 시작점이다.</p>
+        <a class="source-link" href="../npc_persona_version_2/presentation_source/02_canonical_story_data.md">Source: 02_canonical_story_data.md</a>
+        <div class="fact-grid" aria-label="canonical facts">
+          <span>4 NPCs</span><span>5 quests</span><span>8 clues</span><span>30 KnowledgeChunks</span>
+        </div>
+      </div>
+      <aside class="diagram-card" aria-label="canonical data diagram">
+        <svg class="diagram" viewBox="0 0 640 420" role="img" aria-labelledby="diagram-title-2">
+          <title id="diagram-title-2">Canonical data tree</title>
+          <rect x="250" y="36" width="140" height="60" rx="14" class="svg-node success"></rect>
+          <path d="M320 96v54M320 150H120M320 150h200M320 150v124" class="svg-line"></path>
+          <rect x="50" y="150" width="140" height="64" rx="14" class="svg-node"></rect>
+          <rect x="250" y="150" width="140" height="64" rx="14" class="svg-node warning"></rect>
+          <rect x="450" y="150" width="140" height="64" rx="14" class="svg-node"></rect>
+          <rect x="250" y="274" width="140" height="64" rx="14" class="svg-node accent"></rect>
+          <text x="320" y="73" text-anchor="middle">rsc/data</text>
+          <text x="120" y="187" text-anchor="middle">NPC MD</text>
+          <text x="320" y="187" text-anchor="middle">Quest YAML</text>
+          <text x="520" y="187" text-anchor="middle">World YAML</text>
+          <text x="320" y="311" text-anchor="middle">Truth Gate</text>
+        </svg>
+      </aside>
+    </section>
+
+    <section class="slide source-slide" data-source-id="source-03-importer-and-pipeline" data-source-file="03_importer_and_pipeline.md" data-slide-index="3" aria-labelledby="slide-title-3">
+      <div class="slide-copy">
+        <p class="kicker">03 / Transform Paths</p>
+        <h1 id="slide-title-3">Importer And Pipeline</h1>
+        <p class="explain">이 장은 같은 원천에서 갈라지는 두 경로를 구분한다. Direct importer는 `rsc/data`를 읽어 Neo4j runtime graph에 NPC, Quest, Clue, Truth, KnowledgeChunk를 병합한다. Offline pipeline은 같은 원천을 통합 데이터와 import artifact로 만들고 검증한다. 그래서 발표 문장에는 “Direct importer”와 “Offline pipeline”을 반드시 함께 두되, 두 결과가 같은 runtime 표면이라고 말하지 않는다. Neo4j reset requires explicit approval라는 안전 문구도 이 경로에서 고정한다.</p>
+        <a class="source-link" href="../npc_persona_version_2/presentation_source/03_importer_and_pipeline.md">Source: 03_importer_and_pipeline.md</a>
+        <div class="fact-grid" aria-label="import facts">
+          <span>Direct importer</span><span>Offline pipeline</span><span>validation pass</span><span>generated artifacts</span>
+        </div>
+      </div>
+      <aside class="diagram-card" aria-label="two pipeline diagram">
+        <svg class="diagram" viewBox="0 0 640 420" role="img" aria-labelledby="diagram-title-3">
+          <title id="diagram-title-3">Direct and offline data paths</title>
+          <rect x="250" y="42" width="140" height="58" rx="14" class="svg-node success"></rect>
+          <path d="M320 100v48M320 148H150M320 148h170M150 148v122M490 148v122" class="svg-line"></path>
+          <rect x="70" y="210" width="160" height="76" rx="14" class="svg-node accent"></rect>
+          <rect x="410" y="210" width="160" height="76" rx="14" class="svg-node"></rect>
+          <rect x="70" y="318" width="160" height="48" rx="12" class="svg-node"></rect>
+          <rect x="410" y="318" width="160" height="48" rx="12" class="svg-node warning"></rect>
+          <path d="M150 286v32M490 286v32" class="svg-line"></path>
+          <text x="320" y="78" text-anchor="middle">rsc/data</text>
+          <text x="150" y="252" text-anchor="middle">Direct importer</text>
+          <text x="490" y="252" text-anchor="middle">Offline pipeline</text>
+          <text x="150" y="349" text-anchor="middle">Neo4j graph</text>
+          <text x="490" y="349" text-anchor="middle">output/ files</text>
+        </svg>
+      </aside>
+    </section>
+
+    <section class="slide source-slide" data-source-id="source-04-neo4j-graph-contract" data-source-file="04_neo4j_graph_contract.md" data-slide-index="4" aria-labelledby="slide-title-4">
+      <div class="slide-copy">
+        <p class="kicker">04 / Graph Contract</p>
+        <h1 id="slide-title-4">Neo4j Graph Contract</h1>
+        <p class="explain">Neo4j graph contract의 중심은 NPC와 KnowledgeChunk다. `NPC-[:KNOWS]->KnowledgeChunk`에서 시작해 quest, role, hint, answer gate 조건을 통과한 조각만 prompt context가 된다. 이 장은 관계 이름을 단순 장식이 아니라 retrieval 안전 규칙으로 설명한다. `answer_sensitive`, `allowed_hint_level`, `answer_reveal_allowed`는 각각 spoiler 위험, 현재 힌트 상한, 최종 공개 허용 여부를 나타내며, 세 조건이 함께 맞아야 민감 지식이 열린다.</p>
+        <a class="source-link" href="../npc_persona_version_2/presentation_source/04_neo4j_graph_contract.md">Source: 04_neo4j_graph_contract.md</a>
+        <div class="fact-grid" aria-label="graph facts">
+          <span>NPC</span><span>KnowledgeChunk</span><span>Clue and Truth</span><span>ConceptStory admin edge</span>
+        </div>
+      </div>
+      <aside class="diagram-card" aria-label="graph contract diagram">
+        <svg class="diagram" viewBox="0 0 640 420" role="img" aria-labelledby="diagram-title-4">
+          <title id="diagram-title-4">Graph contract nodes</title>
+          <circle cx="178" cy="198" r="64" class="svg-circle accent"></circle>
+          <circle cx="372" cy="198" r="74" class="svg-circle success"></circle>
+          <circle cx="510" cy="100" r="44" class="svg-circle"></circle>
+          <circle cx="510" cy="300" r="44" class="svg-circle warning"></circle>
+          <path d="M242 198h56M426 152l48-34M426 244l48 34M178 262v54h194v-44" class="svg-line"></path>
+          <text x="178" y="204" text-anchor="middle">NPC</text>
+          <text x="372" y="204" text-anchor="middle">KnowledgeChunk</text>
+          <text x="510" y="106" text-anchor="middle">Quest</text>
+          <text x="510" y="306" text-anchor="middle">Truth</text>
+        </svg>
+      </aside>
+    </section>
+
+    <section class="slide source-slide" data-source-id="source-05-streamlit-runtime" data-source-file="05_streamlit_runtime.md" data-slide-index="5" aria-labelledby="slide-title-5">
+      <div class="slide-copy">
+        <p class="kicker">05 / Runtime Turn</p>
+        <h1 id="slide-title-5">Streamlit Runtime</h1>
+        <p class="explain">Streamlit runtime은 한 번의 사용자 입력을 세션 상태, quest decision, retrieval, prompt, 응답, 로그로 연결한다. 공개 deck에서는 내부 접속 문자열과 비밀 기본값을 제거하고, 흐름과 계약만 남긴다. 중요한 공개 사실은 session-only memory, chat log contains only input/output, 그리고 retrieval/prompt/quest/memory 로그가 관심사별로 분리된다는 점이다. 메모리는 NPC별로 분리되어 대화 맥락을 돕지만 Neo4j 영속 지식으로 취급하지 않는다.</p>
+        <a class="source-link" href="../npc_persona_version_2/presentation_source/05_streamlit_runtime.md">Source: 05_streamlit_runtime.md</a>
+        <div class="fact-grid" aria-label="runtime facts">
+          <span>session-only memory</span><span>QuestDecision first</span><span>gated chunks</span><span>input/output log</span>
+        </div>
+      </div>
+      <aside class="diagram-card" aria-label="runtime sequence diagram">
+        <svg class="diagram" viewBox="0 0 640 420" role="img" aria-labelledby="diagram-title-5">
+          <title id="diagram-title-5">Runtime sequence</title>
+          <rect x="46" y="72" width="92" height="250" rx="14" class="svg-node"></rect>
+          <rect x="184" y="72" width="92" height="250" rx="14" class="svg-node accent"></rect>
+          <rect x="322" y="72" width="92" height="250" rx="14" class="svg-node warning"></rect>
+          <rect x="460" y="72" width="92" height="250" rx="14" class="svg-node success"></rect>
+          <path d="M138 122h46M276 174h46M414 226h46M460 278H184" class="svg-line"></path>
+          <text x="92" y="204" text-anchor="middle">User</text>
+          <text x="230" y="204" text-anchor="middle">Streamlit</text>
+          <text x="368" y="204" text-anchor="middle">Quest</text>
+          <text x="506" y="204" text-anchor="middle">Graph</text>
+        </svg>
+      </aside>
+    </section>
+
+    <section class="slide source-slide" data-source-id="source-06-langgraph-quest-progression" data-source-file="06_langgraph_quest_progression.md" data-slide-index="6" aria-labelledby="slide-title-6">
+      <div class="slide-copy">
+        <p class="kicker">06 / Quest State</p>
+        <h1 id="slide-title-6">LangGraph Quest Progression</h1>
+        <p class="explain">LangGraph는 여기서 자유로운 agent planner가 아니라 deterministic quest runner다. `StateGraph`는 사용자 발화와 observed clue map을 받아 `QuestDecision`을 만들고, `InMemorySaver`로 thread별 단서 연속성을 지킨다. `QuestDecision`에는 state, `allowed_hint_level`, observed clues, route target, reveal truth, guidance가 함께 들어간다. 로완 final gate는 `chief_rowan`이 충분한 선행 quest와 정답 연결을 확인했을 때만 `truth_moonwell_mana_cycle` 공개를 허용한다.</p>
+        <a class="source-link" href="../npc_persona_version_2/presentation_source/06_langgraph_quest_progression.md">Source: 06_langgraph_quest_progression.md</a>
+        <div class="fact-grid" aria-label="quest facts">
+          <span>QuestDecision</span><span>InMemorySaver</span><span>route to NPC</span><span>solved never downgrades</span>
+        </div>
+      </div>
+      <aside class="diagram-card" aria-label="quest state diagram">
+        <svg class="diagram" viewBox="0 0 640 420" role="img" aria-labelledby="diagram-title-6">
+          <title id="diagram-title-6">Quest state ladder</title>
+          <path d="M82 210h476" class="svg-line"></path>
+          <circle cx="96" cy="210" r="34" class="svg-circle"></circle>
+          <circle cx="188" cy="210" r="34" class="svg-circle"></circle>
+          <circle cx="280" cy="210" r="34" class="svg-circle warning"></circle>
+          <circle cx="372" cy="210" r="34" class="svg-circle warning"></circle>
+          <circle cx="464" cy="210" r="34" class="svg-circle accent"></circle>
+          <circle cx="556" cy="210" r="34" class="svg-circle success"></circle>
+          <text x="96" y="216" text-anchor="middle">0</text>
+          <text x="188" y="216" text-anchor="middle">1</text>
+          <text x="280" y="216" text-anchor="middle">1</text>
+          <text x="372" y="216" text-anchor="middle">2</text>
+          <text x="464" y="216" text-anchor="middle">3</text>
+          <text x="556" y="216" text-anchor="middle">solved</text>
+        </svg>
+      </aside>
+    </section>
+
+    <section class="slide source-slide" data-source-id="source-07-prompting-and-retrieval" data-source-file="07_prompting_and_retrieval.md" data-slide-index="7" aria-labelledby="slide-title-7">
+      <div class="slide-copy">
+        <p class="kicker">07 / Prompt Safety</p>
+        <h1 id="slide-title-7">Prompting And Retrieval</h1>
+        <p class="explain">Prompting layer는 이미 gate된 KnowledgeChunk와 QuestDecision guidance를 합쳐 NPC가 말해도 되는 정보만 자연스러운 한국어 대사로 말하게 한다. retrieval gate는 NPC match, role match, quest match, `allowed_hint_level`, `answer_sensitive`, `answer_reveal_allowed`를 모두 본다. prompt는 chunk metadata를 그대로 보여주지 않고 제목과 본문만 사용한다. final reveal은 quest rules, retrieval gate, prompt policy가 동시에 열릴 때만 허용된다.</p>
+        <a class="source-link" href="../npc_persona_version_2/presentation_source/07_prompting_and_retrieval.md">Source: 07_prompting_and_retrieval.md</a>
+        <div class="fact-grid" aria-label="prompt facts">
+          <span>allowed_hint_level</span><span>answer_reveal_allowed</span><span>hidden metadata</span><span>Korean NPC voice</span>
+        </div>
+      </div>
+      <aside class="diagram-card" aria-label="prompt safety diagram">
+        <svg class="diagram" viewBox="0 0 640 420" role="img" aria-labelledby="diagram-title-7">
+          <title id="diagram-title-7">Prompt safety gates</title>
+          <rect x="56" y="92" width="132" height="70" rx="14" class="svg-node"></rect>
+          <rect x="254" y="92" width="132" height="70" rx="14" class="svg-node warning"></rect>
+          <rect x="452" y="92" width="132" height="70" rx="14" class="svg-node success"></rect>
+          <rect x="254" y="250" width="132" height="70" rx="14" class="svg-node accent"></rect>
+          <path d="M188 127h66M386 127h66M320 162v88" class="svg-line"></path>
+          <text x="122" y="132" text-anchor="middle">Context</text>
+          <text x="320" y="132" text-anchor="middle">Gate</text>
+          <text x="518" y="132" text-anchor="middle">Chunks</text>
+          <text x="320" y="290" text-anchor="middle">Prompt</text>
+        </svg>
+      </aside>
+    </section>
+
+    <section class="slide source-slide" data-source-id="source-08-admin-ui" data-source-file="08_admin_ui.md" data-slide-index="8" aria-labelledby="slide-title-8">
+      <div class="slide-copy">
+        <p class="kicker">08 / Admin Surface</p>
+        <h1 id="slide-title-8">Admin UI</h1>
+        <p class="explain">Admin UI는 메인 NPC 채팅 화면과 분리된 Streamlit page다. Memory Admin은 NPC별 session memory count와 초기화를 다루고, Quest Admin은 quest state를 저장하며 hint level은 state에서 자동 계산한다. Concept Story Admin은 `ConceptStory` 노드를 별도로 조회하고 병합한다. 발표 문구는 ConceptStory is admin-only를 분명히 말해야 한다. 일반 NPC retrieval에 ConceptStory를 섞어 설명하면 runtime contract가 흐려진다.</p>
+        <a class="source-link" href="../npc_persona_version_2/presentation_source/08_admin_ui.md">Source: 08_admin_ui.md</a>
+        <div class="fact-grid" aria-label="admin facts">
+          <span>Memory Admin</span><span>Quest Admin</span><span>ConceptStory is admin-only</span><span>separate logs</span>
+        </div>
+      </div>
+      <aside class="diagram-card" aria-label="admin UI diagram">
+        <svg class="diagram" viewBox="0 0 640 420" role="img" aria-labelledby="diagram-title-8">
+          <title id="diagram-title-8">Admin tab map</title>
+          <rect x="60" y="74" width="520" height="272" rx="22" class="svg-panel"></rect>
+          <rect x="94" y="116" width="132" height="150" rx="14" class="svg-node success"></rect>
+          <rect x="254" y="116" width="132" height="150" rx="14" class="svg-node warning"></rect>
+          <rect x="414" y="116" width="132" height="150" rx="14" class="svg-node accent"></rect>
+          <path d="M160 266v36M320 266v36M480 266v36" class="svg-line"></path>
+          <text x="160" y="196" text-anchor="middle">Memory</text>
+          <text x="320" y="196" text-anchor="middle">Quest</text>
+          <text x="480" y="196" text-anchor="middle">ConceptStory</text>
+          <text x="320" y="320" text-anchor="middle">Admin page only</text>
+        </svg>
+      </aside>
+    </section>
+
+    <section class="slide source-slide" data-source-id="source-09-docker-and-deployment" data-source-file="09_docker_and_deployment.md" data-slide-index="9" aria-labelledby="slide-title-9">
+      <div class="slide-copy">
+        <p class="kicker">09 / Deployment</p>
+        <h1 id="slide-title-9">Docker And Deployment</h1>
+        <p class="explain">Deployment 장은 default compose and design-test compose are separate라는 사실만 공개 deck에 남긴다. 두 stack은 Streamlit, Neo4j, optional local model service를 갖지만 목적, volume, host binding, 검증 용도가 다르다. 발표 자료에서는 구체 포트, 네트워크 주소, 모델 이름, 비밀 기본값을 노출하지 않는다. 대신 “기본 운영 stack”과 “발표 검증 stack”을 나란히 보여 주고, Neo4j reset requires explicit approval라는 승인 gate를 하단 warning으로 고정한다.</p>
+        <a class="source-link" href="../npc_persona_version_2/presentation_source/09_docker_and_deployment.md">Source: 09_docker_and_deployment.md</a>
+        <div class="fact-grid" aria-label="deployment facts">
+          <span>default compose</span><span>design-test compose</span><span>isolated volume</span><span>approval gate</span>
+        </div>
+      </div>
+      <aside class="diagram-card" aria-label="deployment comparison diagram">
+        <svg class="diagram" viewBox="0 0 640 420" role="img" aria-labelledby="diagram-title-9">
+          <title id="diagram-title-9">Compose stack comparison</title>
+          <rect x="66" y="68" width="220" height="260" rx="20" class="svg-node"></rect>
+          <rect x="354" y="68" width="220" height="260" rx="20" class="svg-node accent"></rect>
+          <path d="M112 142h128M112 208h128M112 274h128M400 142h128M400 208h128M400 274h128" class="svg-line"></path>
+          <text x="176" y="110" text-anchor="middle">Default</text>
+          <text x="464" y="110" text-anchor="middle">Design-test</text>
+          <text x="176" y="306" text-anchor="middle">operation</text>
+          <text x="464" y="306" text-anchor="middle">QA isolate</text>
+        </svg>
+      </aside>
+    </section>
+
+    <section class="slide source-slide" data-source-id="source-10-qa-and-test-artifacts" data-source-file="10_qa_and_test_artifacts.md" data-slide-index="10" aria-labelledby="slide-title-10">
+      <div class="slide-copy">
+        <p class="kicker">10 / Evidence</p>
+        <h1 id="slide-title-10">QA And Test Artifacts</h1>
+        <p class="explain">QA 체계는 source contract test와 live scenario evidence를 분리한다. prompt, Streamlit, quest auto progression, conversation tests는 drift를 막고, live 검증은 실제 11턴 대화에서 retrieval safety와 답변 품질을 확인한다. 공개 deck에는 QA PASS: 11 turns / 30 KnowledgeChunks라는 결론을 넣되, 모델명과 호출 주소는 넣지 않는다. 중요한 메시지는 final 전에는 answer-sensitive chunk와 최종 truth가 막히고, final에는 로완이 정답 연결을 직접 말한다는 양방향 검증이다.</p>
+        <a class="source-link" href="../npc_persona_version_2/presentation_source/10_qa_and_test_artifacts.md">Source: 10_qa_and_test_artifacts.md</a>
+        <div class="fact-grid" aria-label="qa facts">
+          <span>QA PASS: 11 turns / 30 KnowledgeChunks</span><span>contract tests</span><span>live scenario</span><span>final gate evidence</span>
+        </div>
+      </div>
+      <aside class="diagram-card" aria-label="QA evidence diagram">
+        <svg class="diagram" viewBox="0 0 640 420" role="img" aria-labelledby="diagram-title-10">
+          <title id="diagram-title-10">QA evidence pyramid</title>
+          <polygon points="320,58 540,332 100,332" class="svg-pyramid"></polygon>
+          <path d="M194 250h252M250 178h140" class="svg-line"></path>
+          <text x="320" y="306" text-anchor="middle">source contracts</text>
+          <text x="320" y="224" text-anchor="middle">conversation</text>
+          <text x="320" y="148" text-anchor="middle">live QA</text>
+          <text x="320" y="86" text-anchor="middle">PASS</text>
+        </svg>
+      </aside>
+    </section>
+
+    <section class="slide source-slide" data-source-id="source-11-visual-generation-guide" data-source-file="11_visual_generation_guide.md" data-slide-index="11" aria-labelledby="slide-title-11">
+      <div class="slide-copy">
+        <p class="kicker">11 / Visual System</p>
+        <h1 id="slide-title-11">Visual Generation Guide</h1>
+        <p class="explain">마지막 장은 이 deck 자체의 제작 원칙을 검증한다. 원천 문서의 Mermaid와 설명을 그대로 이미지 생성 프롬프트로 노출하지 않고, offline static artifact 안에서 local inline SVG diagram으로 다시 구성했다. 각 장은 source file 이름과 data-source-id를 안정적으로 보존한다. visual checklist는 `rsc/data`와 generated output의 분리, Direct importer와 Offline pipeline, retrieval safety gate, session memory, Admin-only ConceptStory, QA evidence, reset approval을 빠짐없이 포함하는지 확인한다.</p>
+        <a class="source-link" href="../npc_persona_version_2/presentation_source/11_visual_generation_guide.md">Source: 11_visual_generation_guide.md</a>
+        <div class="fact-grid" aria-label="visual guide facts">
+          <span>inline SVG</span><span>no external assets</span><span>stable source IDs</span><span>responsive Korean headings</span>
+        </div>
+      </div>
+      <aside class="diagram-card" aria-label="visual generation diagram">
+        <svg class="diagram" viewBox="0 0 640 420" role="img" aria-labelledby="diagram-title-11">
+          <title id="diagram-title-11">Visual deck production loop</title>
+          <rect x="72" y="74" width="126" height="70" rx="14" class="svg-node success"></rect>
+          <rect x="258" y="74" width="126" height="70" rx="14" class="svg-node"></rect>
+          <rect x="444" y="74" width="126" height="70" rx="14" class="svg-node accent"></rect>
+          <rect x="258" y="246" width="126" height="70" rx="14" class="svg-node warning"></rect>
+          <path d="M198 109h60M384 109h60M507 144v136H384M258 281H135V144" class="svg-line"></path>
+          <text x="135" y="114" text-anchor="middle">Source</text>
+          <text x="321" y="114" text-anchor="middle">Diagram</text>
+          <text x="507" y="114" text-anchor="middle">Deck</text>
+          <text x="321" y="286" text-anchor="middle">Check</text>
+        </svg>
+      </aside>
+    </section>
+  </main>
+
+  <script src="deck.js" defer></script>
+</body>
+</html>

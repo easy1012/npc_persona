@@ -1,0 +1,61 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata: {name: hazel-api, namespace: hazel}
+spec:
+  replicas: 1
+  selector: {matchLabels: {app: hazel-api}}
+  template:
+    metadata: {labels: {app: hazel-api}}
+    spec:
+      nodeSelector: {hazel-role: model}
+      containers:
+        - name: api
+          image: hazel-api:latest
+          ports: [{containerPort: 8000}]
+          envFrom: [{secretRef: {name: hazel-model-runtime}}]
+          env:
+            - {name: VLLM_URL, value: "http://hazel-vllm:8000/v1/chat/completions"}
+            - {name: MODEL_NAME, value: "google/gemma-4-E4B-it"}
+          readinessProbe: {httpGet: {path: /api/health, port: 8000}}
+          livenessProbe: {httpGet: {path: /api/health, port: 8000}, initialDelaySeconds: 30}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata: {name: hazel-streamlit, namespace: hazel}
+spec:
+  replicas: 1
+  selector: {matchLabels: {app: hazel-streamlit}}
+  template:
+    metadata: {labels: {app: hazel-streamlit}}
+    spec:
+      nodeSelector: {hazel-role: model}
+      containers:
+        - name: streamlit
+          image: hazel-streamlit:latest
+          ports: [{containerPort: 8501}]
+          env:
+            - {name: GAME_API_URL, value: "http://hazel-api:8000/api"}
+          readinessProbe: {httpGet: {path: /_stcore/health, port: 8501}}
+          livenessProbe: {httpGet: {path: /_stcore/health, port: 8501}, initialDelaySeconds: 30}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata: {name: hazel-vllm, namespace: hazel}
+spec:
+  replicas: 0
+  selector: {matchLabels: {app: hazel-vllm}}
+  template:
+    metadata: {labels: {app: hazel-vllm}}
+    spec:
+      nodeSelector: {hazel-role: model}
+      containers:
+        - name: vllm
+          image: vllm/vllm-openai:latest
+          args: ["--model", "/models/gemma-4-E4B-it", "--served-model-name", "google/gemma-4-E4B-it", "--host", "0.0.0.0", "--port", "8000"]
+          ports: [{containerPort: 8000}]
+          volumeMounts: [{name: model-files, mountPath: /models/gemma-4-E4B-it, readOnly: true}]
+          resources: {limits: {nvidia.com/gpu: 1}}
+          startupProbe: {httpGet: {path: /health, port: 8000}, failureThreshold: 60, periodSeconds: 15}
+      volumes:
+        - name: model-files
+          hostPath: {path: /srv/models/google-gemma-4-E4B-it, type: Directory}

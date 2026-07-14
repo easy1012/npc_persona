@@ -1,0 +1,92 @@
+x-logging: &default-logging
+  driver: json-file
+  options: {max-size: "10m", max-file: "5"}
+
+services:
+  proxy:
+    image: caddy:2.10
+    ports:
+      - "443:443"
+    environment:
+      PUBLIC_HOSTNAME: ${PUBLIC_HOSTNAME:?set PUBLIC_HOSTNAME}
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+    depends_on:
+      api:
+        condition: service_healthy
+      streamlit:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q --spider http://127.0.0.1:2019/config/"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 10s
+    restart: unless-stopped
+    logging: *default-logging
+
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile.api
+    environment:
+      POSTGRES_DSN: ${POSTGRES_DSN:?set POSTGRES_DSN}
+      NEO4J_URI: ${NEO4J_URI:?set NEO4J_URI}
+      NEO4J_USER: ${NEO4J_USER:-neo4j}
+      NEO4J_PASSWORD: ${NEO4J_PASSWORD:?set NEO4J_PASSWORD}
+      VLLM_URL: http://vllm:8000/v1/chat/completions
+      EMBEDDING_URL: ${EMBEDDING_URL:-http://vllm:8000/v1/embeddings}
+      EMBEDDING_MODEL: ${EMBEDDING_MODEL:-google/gemma-4-E4B-it}
+      MODEL_NAME: ${MODEL_NAME:-google/gemma-4-E4B-it}
+    healthcheck:
+      test: ["CMD-SHELL", "python -c \"import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/api/health', timeout=5)\""]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 20s
+    restart: unless-stopped
+    logging: *default-logging
+
+  streamlit:
+    build:
+      context: .
+      dockerfile: Dockerfile.streamlit
+    environment:
+      GAME_API_URL: http://api:8000/api
+    depends_on:
+      api:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "python -c \"import urllib.request; urllib.request.urlopen('http://127.0.0.1:8501/_stcore/health', timeout=5)\""]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 20s
+    restart: unless-stopped
+    logging: *default-logging
+
+  vllm:
+    image: vllm/vllm-openai:latest
+    profiles: ["gpu"]
+    command: ["--model", "/models/gemma-4-E4B-it", "--served-model-name", "${MODEL_NAME:-google/gemma-4-E4B-it}", "--host", "0.0.0.0", "--port", "8000"]
+    volumes:
+      - ${LOCAL_MODEL_DIR:?set LOCAL_MODEL_DIR}:/models/gemma-4-E4B-it:ro
+    healthcheck:
+      test: ["CMD-SHELL", "python3 -c \"import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health', timeout=5)\""]
+      interval: 15s
+      timeout: 10s
+      retries: 60
+      start_period: 10m
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+    restart: unless-stopped
+    logging: *default-logging
+
+volumes:
+  caddy_data:

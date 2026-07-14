@@ -1,0 +1,9 @@
+FROM python:3.10-slim
+WORKDIR /app
+ENV PYTHONPATH=/app
+COPY --from=ghcr.io/astral-sh/uv:latest /uv /usr/local/bin/uv
+COPY pyproject.toml uv.lock ./
+RUN uv sync --frozen --no-dev
+COPY src ./src
+RUN rm -rf /app/src/streamlit/pages
+CMD ["uv", "run", "--frozen", "streamlit", "run", "src/streamlit/player_app.py", "--server.port=8501", "--server.address=0.0.0.0"]

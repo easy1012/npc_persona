@@ -1,0 +1,14 @@
+apiVersion: batch/v1
+kind: Job
+metadata: {name: hazel-database-migration, namespace: hazel}
+spec:
+  backoffLimit: 3
+  template:
+    metadata: {labels: {app: hazel-database-migration}}
+    spec:
+      restartPolicy: OnFailure
+      nodeSelector: {hazel-role: database}
+      containers:
+        - name: migrate
+          image: hazel-database-migrate:latest
+          envFrom: [{secretRef: {name: hazel-database}}]

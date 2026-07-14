@@ -1,0 +1,17 @@
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata: {name: database-from-api-only, namespace: hazel}
+spec:
+  podSelector:
+    matchExpressions:
+      - {key: app, operator: In, values: [hazel-postgres, hazel-neo4j]}
+  policyTypes: [Ingress]
+  ingress:
+    - from:
+        - namespaceSelector: {matchLabels: {kubernetes.io/metadata.name: hazel}}
+          podSelector:
+            matchExpressions:
+              - {key: app, operator: In, values: [hazel-api, hazel-database-migration]}
+      ports:
+        - {protocol: TCP, port: 5432}
+        - {protocol: TCP, port: 7687}

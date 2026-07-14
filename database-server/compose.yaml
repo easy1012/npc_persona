@@ -1,0 +1,58 @@
+x-logging: &default-logging
+  driver: json-file
+  options: {max-size: "10m", max-file: "5"}
+
+services:
+  postgres:
+    image: pgvector/pgvector:pg16
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-hazel}
+      POSTGRES_USER: ${POSTGRES_USER:-hazel}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "${DATABASE_BIND_IP:?set DATABASE_BIND_IP}:5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 20s
+    restart: unless-stopped
+    logging: *default-logging
+
+  neo4j:
+    image: neo4j:5
+    environment:
+      NEO4J_AUTH: ${NEO4J_USER:-neo4j}/${NEO4J_PASSWORD:?set NEO4J_PASSWORD}
+    volumes:
+      - neo4j_data:/data
+      - neo4j_logs:/logs
+    ports:
+      - "${DATABASE_BIND_IP:?set DATABASE_BIND_IP}:7687:7687"
+    healthcheck:
+      test: ["CMD-SHELL", "auth=\"$${NEO4J_AUTH}\"; user=\"$${auth%%/*}\"; password=\"$${auth#*/}\"; cypher-shell -u \"$${user}\" -p \"$${password}\" 'RETURN 1'"]
+      interval: 10s
+      timeout: 10s
+      retries: 12
+      start_period: 30s
+    restart: unless-stopped
+    logging: *default-logging
+
+  migrate:
+    build:
+      context: .
+      dockerfile: Dockerfile.migrate
+    profiles: ["tools"]
+    environment:
+      POSTGRES_DSN: postgresql+psycopg://${POSTGRES_USER:-hazel}:${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-hazel}
+    depends_on:
+      postgres:
+        condition: service_healthy
+    logging: *default-logging
+
+volumes:
+  postgres_data:
+  neo4j_data:
+  neo4j_logs:
