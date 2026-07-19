@@ -26,3 +26,9 @@ dependencies = [
 [tool.basedpyright]
 venvPath = ".."
 venv = ".venv"
+
+[dependency-groups]
+dev = [
+    "basedpyright>=1.39.9",
+    "ruff>=0.15.21",
+]

@@ -141,3 +141,9 @@ class NpcMemorySummary(Base):
     summary: Mapped[str] = mapped_column(Text, default="")
     recent_turn_count: Mapped[int] = mapped_column(Integer, default=0)
     max_memory_count: Mapped[int] = mapped_column(Integer, default=40)
+    summarized_through_ordinal: Mapped[int] = mapped_column(Integer, default=-1)
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        server_default=func.now(),
+        onupdate=func.now(),
+    )

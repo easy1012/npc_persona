@@ -4,7 +4,7 @@ import asyncio
 from functools import lru_cache
 from typing import cast, final
 
-from neo4j import Driver, GraphDatabase
+from neo4j import GraphDatabase
 from pydantic import BaseModel, ConfigDict
 import requests
 

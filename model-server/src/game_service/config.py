@@ -18,6 +18,9 @@ class Settings(BaseSettings):
     embedding_url: str = "http://vllm:8000/v1/embeddings"
     embedding_model: str = "google/gemma-4-E4B-it"
 
+    def __init__(self) -> None:
+        super().__init__()
+
 
 @lru_cache(maxsize=1)
 def get_settings() -> Settings:

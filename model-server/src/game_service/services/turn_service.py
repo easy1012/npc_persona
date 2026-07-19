@@ -5,10 +5,20 @@ import logging
 from typing import Protocol
 from uuid import UUID
 
+from pydantic import ValidationError
+import requests
 from sqlalchemy import func, select
+from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.sql import Select
 
 from src.game_service.models import Conversation, Message, QuestProgress, TurnAttempt
+from src.game_service.services.memory_repository import SqlAlchemyMemoryStore
+from src.game_service.services.memory_service import (
+    MemoryScope,
+    compact_memory_if_needed,
+    load_memory_context,
+)
 from src.game_service.services.retrieval_service import GraphDriver, retrieve_hybrid_knowledge
 from src.streamlit.prompting import build_prompt
 from src.streamlit.quest_types import NPC_METADATA, NPC_NAMES
@@ -42,6 +52,10 @@ async def complete_pending_turn(
 FAILED_STATUS = "failed"
 
 
+def conversation_append_lock(conversation_id: UUID) -> Select[tuple[UUID]]:
+    return select(Conversation.id).where(Conversation.id == conversation_id).with_for_update()
+
+
 def npc_prompt_profile(npc_id: str) -> dict[str, object]:
     return {"name": NPC_NAMES[npc_id], "role": NPC_METADATA[npc_id].player_role}
 
@@ -63,6 +77,12 @@ async def complete_persisted_turn(
     attempt.status = "llm_pending"
     attempt.failure_code = None
     await db.commit()
+    memory_store = SqlAlchemyMemoryStore(db)
+    memory_scope = MemoryScope(
+        save_id=conversation.save_id,
+        npc_id=conversation.npc_id,
+        conversation_id=conversation.id,
+    )
     try:
         progress = await db.scalar(
             select(QuestProgress).where(
@@ -90,14 +110,7 @@ async def complete_persisted_turn(
             user_message,
             embedding,
         )
-        prior_messages = (
-            await db.scalars(
-                select(Message)
-                .where(Message.conversation_id == conversation.id)
-                .order_by(Message.ordinal)
-            )
-        ).all()
-        context = "\n".join(f"{message.role}: {message.content}" for message in prior_messages[-8:])
+        context = await load_memory_context(memory_store, memory_scope, attempt.id)
         chunks = list(knowledge.graph_chunks)
         chunks.extend({"title": "마을 기록", "text": document} for document in knowledge.full_documents)
         prompt = build_prompt(
@@ -113,6 +126,7 @@ async def complete_persisted_turn(
         )
         await db.commit()
         answer = await llm_client.complete(prompt)
+        _ = await db.execute(conversation_append_lock(conversation.id))
         ordinal = await db.scalar(
             select(func.coalesce(func.max(Message.ordinal), -1)).where(
                 Message.conversation_id == conversation.id
@@ -141,4 +155,18 @@ async def complete_persisted_turn(
         attempt.status = FAILED_STATUS
         attempt.failure_code = type(error).__name__[:64]
         await db.commit()
+    if attempt.status == "succeeded":
+        try:
+            _ = await compact_memory_if_needed(memory_store, memory_scope, llm_client)
+        except (requests.RequestException, ValidationError, SQLAlchemyError, RuntimeError, ValueError):
+            logger.exception(
+                "memory compaction failed",
+                extra={"attempt_id": str(attempt_id), "npc_id": conversation.npc_id},
+            )
+            await db.rollback()
+            reloaded_attempt = await db.get(TurnAttempt, attempt_id)
+            if reloaded_attempt is None:
+                raise RuntimeError("completed turn disappeared after memory rollback")
+            attempt = reloaded_attempt
+            await db.refresh(conversation)
     return attempt
